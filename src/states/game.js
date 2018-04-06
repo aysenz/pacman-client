@@ -1,6 +1,7 @@
 import Hero from '../components/Hero'
-import Artifact from '../components/Artifact';
-import ArtifactManager from '../components/ArtifactManager';
+import Artifact from '../components/Artifact'
+import ArtifactManager from '../components/ArtifactManager'
+import Physics from '../components/Physics'
 
 class Game extends Phaser.State {
 
@@ -13,9 +14,10 @@ class Game extends Phaser.State {
   }
 
   create() {
-    this.hero = new Hero(this.game.world.centerX, this.game.world.centerY, 1, this.username);
-    this.artifactManager = new ArtifactManager(this.game, 10, 100)
+    this.artifactManager = new ArtifactManager(this.game, 100, 150)
     this.artifactManager.create()
+    this.hero = new Hero(this.game.world.centerX, this.game.world.centerY, this.username);
+    this.physics = new Physics()
   }
 
   render() {
@@ -40,6 +42,14 @@ class Game extends Phaser.State {
   }
 
   update() {
+    let globalThis = this
+    this.artifactManager.getAll().forEach((artifact, index) => {
+      if (globalThis.physics.objectOnObject(globalThis.hero, artifact)) {
+        globalThis.hero.eat(artifact)
+        globalThis.artifactManager.delete(index)
+      }
+    })
+
     if (this.game.input.keyboard.isDown(Phaser.KeyCode.LEFT)) {
       this.hero.x -= this.hero.speed
     }

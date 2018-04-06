@@ -1,13 +1,13 @@
 class Artifact extends Phaser.Circle {
-  constructor(x, y, level) {
-    super(x, y, level * 10)
-    this.level = level
+  constructor(x, y, type) {
+    super(x, y, 10)
     this.TYPES = {
       POTATO: 0,
       POTION: 1,
       MEATBALL: 2
     }
-    this.type = Math.round(2*Math.random())
+    if (!type) this.type = Math.round(2*Math.random())
+    else this.type = type
   }
 }
 

@@ -8,9 +8,20 @@ class ArtifactManager {
     this._artifacts = []
   }
   getAll() { return this._artifacts }
-  create() {
-    let artifact = new Artifact(Math.round(this._game.world.randomX), Math.round(this._game.world.randomY), 1)
+  createOne() {
+    let artifact = new Artifact(Math.round(this._game.world.randomX), Math.round(this._game.world.randomY))
     this._artifacts.push(artifact)
+  }
+  create() {
+    let randCount = this._min + Math.round(this._max - this._min * Math.random())
+    let i = 0
+    while (i < randCount) {
+      this.createOne()
+      i++
+    }
+  }
+  delete(index) {
+    delete this._artifacts[index]
   }
 }
 
