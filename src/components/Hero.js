@@ -1,9 +1,8 @@
-import Material from './Material'
-
-class Hero extends Material {
+class Hero extends Phaser.Circle {
   constructor(x, y, level, name) {
-    super(x, y, level * 10, level * 10)
-    this.speed = level * 5
+    super(x, y, level * 15)
+    this.speed = level * 3
+    this.level = level
     this.name = name
   }
 }

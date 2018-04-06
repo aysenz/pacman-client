@@ -49,14 +49,21 @@ class Menu extends Phaser.State {
     });
     var button;
     panel.add(button = new SlickUI.Element.Button(this.game.width/2 - 140/2,this.game.height/2 - 80/2 - 8, 140, 80));
-    button.events.onInputUp.add(function () {console.log('Clicked button');});
+    var globalThis = this
+    globalThis.startGame({username: 'test'});
+    button.events.onInputUp.add(function () {
+      console.log('Clicked button');
+      var re = /^\w+$/
+      if (re.exec(textField.value)) globalThis.startGame({username: textField.value});
+      else alert('Incorrect username');
+    });
     button.add(new SlickUI.Element.Text(0,0, "Play")).center();
   }
 
   update() {}
 
-  startGame () {
-    this.game.state.start('game');
+  startGame (args) {
+    this.game.state.start('game', true, false, args);
   }
 
 }
