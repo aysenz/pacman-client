@@ -14,12 +14,18 @@ class Hero extends Phaser.Circle {
     }
   }
   _eatArtifact(artifact) {
+    let diameterDiff
     switch (artifact.type) {
       case artifact.TYPES.POTATO:
-        let diameterDiff = artifact.diameter / this.diameter
+        diameterDiff = artifact.diameter / this.diameter
         this.diameter += diameterDiff * 15
         break
       case artifact.TYPES.POTION:
+        diameterDiff = artifact.diameter / this.diameter
+        if (this.diameter >= 15) {
+          this.diameter -= diameterDiff * 15
+          if (this.diameter < 15) this.diameter = 15
+        }
         break
       case artifact.TYPES.MEATBALL:
         break
