@@ -28,6 +28,8 @@ class Hero extends Phaser.Circle {
         }
         break
       case artifact.TYPES.MEATBALL:
+        this.speed += 2
+        setTimeout(() => this.speed -= 2, 3000)
         break
     }
   }
