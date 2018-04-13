@@ -1,37 +1,22 @@
 class Hero extends Phaser.Circle {
-  constructor(x, y, name) {
-    super(x, y, 15)
+  constructor(id, x, y, diameter, name) {
+    super(x, y, diameter)
+    this.id = id
     this.name = name
-    this.speed = 3
   }
-  eat(something) {
-    switch (something.constructor.name) {
-      case 'Artifact':
-        this._eatArtifact(something)
-        break
-      case 'Hero':
-        break
-    }
+  create(game) {
+    this.heroGfx = game.add.graphics(this.x, this.y)
+    this.heroGfxName = game.add.text(0, 0, this.name, { fill: '#00f', fontSize: '12px' })
   }
-  _eatArtifact(artifact) {
-    let diameterDiff
-    switch (artifact.type) {
-      case artifact.TYPES.POTATO:
-        diameterDiff = artifact.diameter / this.diameter
-        this.diameter += diameterDiff * 15
-        break
-      case artifact.TYPES.POTION:
-        diameterDiff = artifact.diameter / this.diameter
-        if (this.diameter >= 15) {
-          this.diameter -= diameterDiff * 15
-          if (this.diameter < 15) this.diameter = 15
-        }
-        break
-      case artifact.TYPES.MEATBALL:
-        this.speed += 2
-        setTimeout(() => this.speed -= 2, 3000)
-        break
-    }
+  render() {
+    this.heroGfx.clear()
+    this.heroGfx.beginFill(0xcfffff, 1)
+    this.heroGfx.drawCircle(0, 0, this.diameter)
+    // this.heroGfx.endFill()
+    this.heroGfx.x = this.x
+    this.heroGfx.y = this.y
+    this.heroGfxName.x = this.x - this.heroGfxName.width / 2
+    this.heroGfxName.y = this.y - this.heroGfxName.height / 3
   }
 }
 

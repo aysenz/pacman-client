@@ -1,7 +1,7 @@
 import Hero from '../components/Hero'
+import HeroManager from '../components/HeroManager'
 import Artifact from '../components/Artifact'
 import ArtifactManager from '../components/ArtifactManager'
-import Physics from '../components/Physics'
 
 class Game extends Phaser.State {
 
@@ -11,28 +11,60 @@ class Game extends Phaser.State {
 
   init(args) {
     this.username = args.username
+    this.userID = 0
+    this.objects = { artifacts: [], heroes: [] }
+    var globalThis = this
+    this.ws = new WebSocket('ws://' + args.serverIP + ':13254/')
+    this.ws.onopen = function() {
+      globalThis.ws.send(JSON.stringify({
+        'cmd_type': 'connect_new_gamer',
+        'name': globalThis.username
+      }))
+    }
+    this.ws.onmessage = function(e) {
+      var msg = JSON.parse(e.data)
+      switch (msg.cmd_type) {
+        case 'your_id':
+          globalThis.userID = msg.your_id
+          break;
+        case 'all_positions':
+          globalThis.objects = msg.positions
+          globalThis.create()
+          break;
+        case 'connect_new_gamer':
+          if (msg.hero.id != globalThis.userID) {
+            globalThis.heroManager.createOne(msg.hero.id, msg.hero.x, msg.hero.y, msg.hero.diameter, msg.hero.name)
+          }
+          break;
+        case 'destroy_hero':
+          // globalThis.heroManager.delete(msg.hero_id)
+          break;
+        case 'destroy_artifact':
+          globalThis.artifactManager.delete(msg.artifact_id)
+          break;
+        case 'move':
+          globalThis.heroManager.setPosition(msg.hero_id, msg.position)
+          break;
+      }
+    }
+    this.ws.onclose = function() {
+      alert('server is down')
+    }
+    this.ws.onerror = function(e) {
+      console.log(e)
+    }
   }
 
   create() {
     this.game.world.setBounds(0, 0, 1920, 1200);
-    this.artifactManager = new ArtifactManager(this.game, 100, 150)
-    this.artifactManager.create()
-    this.hero = new Hero(this.game.world.centerX, this.game.world.centerY, this.username);
-    this.heroGfx = this.game.add.graphics(this.hero.x, this.hero.y)
-    this.heroGfxName = this.game.add.text(0, 0, this.username, { fill: '#00f', fontSize: '12px' })
-    this.physics = new Physics()
+    this.artifactManager = new ArtifactManager(this.game)
+    this.artifactManager.createAll(this.objects.artifacts)
+    this.heroManager = new HeroManager(this.game)
+    this.heroManager.createAll(this.objects.heroes)
   }
 
   render() {
-    this.heroGfx.clear()
-    this.heroGfx.beginFill(0xcfffff, 1)
-    this.heroGfx.drawCircle(0, 0, this.hero.diameter)
-    // this.heroGfx.endFill()
-    this.heroGfx.x = this.hero.x
-    this.heroGfx.y = this.hero.y
-    this.heroGfxName.x = this.hero.x - this.heroGfxName.width / 2
-    this.heroGfxName.y = this.hero.y - this.heroGfxName.height / 3
-
+    this.heroManager.render()
     this.artifactManager.getAll().forEach(artifact => {
       let color
       switch (artifact.type) {
@@ -51,27 +83,25 @@ class Game extends Phaser.State {
   }
 
   update() {
-    this.game.camera.x = this.hero.x - window.innerWidth / 2
-    this.game.camera.y = this.hero.y - window.innerHeight / 2
-    let globalThis = this
-    this.artifactManager.getAll().forEach((artifact, index) => {
-      if (globalThis.physics.objectOnObject(globalThis.hero, artifact)) {
-        globalThis.hero.eat(artifact)
-        globalThis.artifactManager.delete(index)
+    let hero = this.heroManager.get(this.userID)
+    if (hero != void 0) {
+      if (hero.id == this.userID) {
+        this.game.camera.x = hero.x - window.innerWidth / 2
+        this.game.camera.y = hero.y - window.innerHeight / 2
       }
-    })
+    }
 
     if (this.game.input.keyboard.isDown(Phaser.KeyCode.LEFT)) {
-      this.hero.x -= this.hero.speed
+      this.ws.send(JSON.stringify({ 'cmd_type': 'move', 'direction': 'left' }))
     }
     if (this.game.input.keyboard.isDown(Phaser.KeyCode.RIGHT)) {
-      this.hero.x += this.hero.speed
+      this.ws.send(JSON.stringify({ 'cmd_type': 'move', 'direction': 'right' }))
     }
     if (this.game.input.keyboard.isDown(Phaser.KeyCode.UP)) {
-      this.hero.y -= this.hero.speed
+      this.ws.send(JSON.stringify({ 'cmd_type': 'move', 'direction': 'up' }))
     }
     if (this.game.input.keyboard.isDown(Phaser.KeyCode.DOWN)) {
-      this.hero.y += this.hero.speed
+      this.ws.send(JSON.stringify({ 'cmd_type': 'move', 'direction': 'down' }))
     }
   }
 

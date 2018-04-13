@@ -1,27 +1,29 @@
 import Artifact from './Artifact'
 
 class ArtifactManager {
-  constructor(game, min, max) {
+  constructor(game) {
     this._game = game
-    this._min = min
-    this._max = max
     this._artifacts = []
   }
   getAll() { return this._artifacts }
-  createOne() {
-    let artifact = new Artifact(Math.round(this._game.world.randomX), Math.round(this._game.world.randomY))
+  createOne(id, x, y, diameter, type) {
+    let artifact = new Artifact(id, x, y, diameter, type)
     this._artifacts.push(artifact)
   }
-  create() {
-    let randCount = this._min + Math.round(this._max - this._min * Math.random())
-    let i = 0
-    while (i < randCount) {
-      this.createOne()
-      i++
-    }
+  createAll(artifacts) {
+    var extThis = this
+    artifacts.forEach(e => extThis.createOne(e.id, e.x, e.y, e.diameter, e.type))
   }
-  delete(index) {
-    delete this._artifacts[index]
+  delete(id) {
+    var idx = this._getIndex(id)
+    delete this._artifacts[idx]
+  }
+  _getIndex(id) {
+    var idx
+    this._artifacts.forEach((a, i) => {
+      if (a.id == id) idx = i
+    })
+    return idx
   }
 }
 
