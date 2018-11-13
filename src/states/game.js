@@ -45,6 +45,9 @@ class Game extends Phaser.State {
         case 'move':
           globalThis.heroManager.setPosition(msg.hero_id, msg.position)
           break;
+        case 'create_artifact':
+          globalThis.artifactManager.createOne(msg.artifact.id, msg.artifact.x, msg.artifact.y, msg.artifact.diameter, msg.artifact.type)
+          break;
       }
     }
     this.ws.onclose = function() {
@@ -53,6 +56,20 @@ class Game extends Phaser.State {
     this.ws.onerror = function(e) {
       console.log(e)
     }
+    setInterval(() => {
+      if (this.game.input.keyboard.isDown(Phaser.KeyCode.LEFT)) {
+        this.ws.send(JSON.stringify({ 'cmd_type': 'move', 'direction': 'left' }))
+      }
+      if (this.game.input.keyboard.isDown(Phaser.KeyCode.RIGHT)) {
+        this.ws.send(JSON.stringify({ 'cmd_type': 'move', 'direction': 'right' }))
+      }
+      if (this.game.input.keyboard.isDown(Phaser.KeyCode.UP)) {
+        this.ws.send(JSON.stringify({ 'cmd_type': 'move', 'direction': 'up' }))
+      }
+      if (this.game.input.keyboard.isDown(Phaser.KeyCode.DOWN)) {
+        this.ws.send(JSON.stringify({ 'cmd_type': 'move', 'direction': 'down' }))
+      }
+    }, 1000/60)
   }
 
   create() {
@@ -89,19 +106,6 @@ class Game extends Phaser.State {
         this.game.camera.x = hero.x - window.innerWidth / 2
         this.game.camera.y = hero.y - window.innerHeight / 2
       }
-    }
-
-    if (this.game.input.keyboard.isDown(Phaser.KeyCode.LEFT)) {
-      this.ws.send(JSON.stringify({ 'cmd_type': 'move', 'direction': 'left' }))
-    }
-    if (this.game.input.keyboard.isDown(Phaser.KeyCode.RIGHT)) {
-      this.ws.send(JSON.stringify({ 'cmd_type': 'move', 'direction': 'right' }))
-    }
-    if (this.game.input.keyboard.isDown(Phaser.KeyCode.UP)) {
-      this.ws.send(JSON.stringify({ 'cmd_type': 'move', 'direction': 'up' }))
-    }
-    if (this.game.input.keyboard.isDown(Phaser.KeyCode.DOWN)) {
-      this.ws.send(JSON.stringify({ 'cmd_type': 'move', 'direction': 'down' }))
     }
   }
 
